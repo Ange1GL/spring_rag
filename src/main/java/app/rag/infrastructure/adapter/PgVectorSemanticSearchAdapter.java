@@ -1,6 +1,6 @@
 package app.rag.infrastructure.adapter;
 
-import app.rag.application.config.RetrievalProperties;
+import app.rag.infrastructure.config.RetrievalProperties;
 import app.rag.domain.model.RetrievedChunk;
 import app.rag.domain.port.out.SemanticSearchPort;
 import lombok.RequiredArgsConstructor;

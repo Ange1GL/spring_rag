@@ -1,4 +1,4 @@
-package app.rag.application.config;
+package app.rag.infrastructure.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

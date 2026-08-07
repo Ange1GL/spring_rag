@@ -1,6 +1,6 @@
 package app.rag.application.usecase;
 
-import app.rag.application.config.RetrievalProperties;
+import app.rag.infrastructure.config.RetrievalProperties;
 import app.rag.domain.model.AskQuestionCommand;
 import app.rag.domain.model.AskQuestionResult;
 import app.rag.domain.model.RetrievedChunk;

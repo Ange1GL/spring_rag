@@ -6,7 +6,6 @@ import app.rag.domain.model.IngestResult;
 import app.rag.domain.port.in.AskQuestionUseCase;
 import app.rag.domain.port.in.IngestDocumentUseCase;
 import app.rag.domain.port.out.ModelAIProvider;
-import app.rag.infrastructure.dto.request.AskModelAIRequest;
 import app.rag.infrastructure.dto.request.AskQuestionRequest;
 import app.rag.infrastructure.dto.request.VectorizeRequest;
 import lombok.RequiredArgsConstructor;
@@ -25,13 +24,6 @@ public class ModelAIController {
     private final IngestDocumentUseCase ingestDocumentUseCase;
     private final AskQuestionUseCase askQuestionUseCase;
 
-    @PostMapping
-    public ResponseEntity<String> ask(
-            @RequestBody AskModelAIRequest request
-            ) {
-       String result =   modelAIProvider.ask(request.prompt());
-        return ResponseEntity.ok(result);
-    }
 
     @PostMapping("/vectorize")
     public ResponseEntity<IngestResult> vectorize(
