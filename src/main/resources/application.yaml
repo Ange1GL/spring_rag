@@ -46,15 +46,6 @@ spring:
     # ^ Carga variables sensibles desde el archivo .env sin agregar librerías (solución nativa de Spring Boot).
     #   Si no existe el .env, la app arranca igual (optional).
 
-  flyway:
-    enabled: true
-    # ^ Activa Flyway (default cuando flyway-core está en el classpath; se deja explícito).
-    locations: classpath:db/migration
-    # ^ Carpeta donde viven las migraciones versionadas (V1__init_vector_schema.sql).
-    baseline-on-migrate: false
-    # ^ Si la BD ya tiene tablas sin tabla de control flyway_schema_history, la marca como
-    #   punto de partida en vez de fallar y aplica solo las migraciones nuevas.
-
   ai:
     model:
       chat: openai
@@ -100,11 +91,11 @@ spring:
         index-type: hnsw
         # ^ Tipo de índice vectorial (hnsw = balance velocidad/precisión).
         distance-type: cosine-distance
-        # ^ Métrica de similitud (coseno), compatible con el índice creado en la migración.
-        initialize-schema: false
-        # ^ La tabla la crea Flyway (V1__init_vector_schema.sql); Spring AI no debe crearla.
+        # ^ Métrica de similitud (coseno), usada también por el índice que crea Spring AI.
+        initialize-schema: true
+        # ^ Spring AI crea automáticamente la extensión vector, la tabla vector_store y su índice al arrancar.
         schema-name: public
-        # ^ Esquema donde vive la tabla vector_store.
+        # ^ Esquema donde Spring AI crea la tabla vector_store.
         table-name: vector_store
         # ^ Nombre de la tabla esperada por PgVectorStore (default de Spring AI).
 
