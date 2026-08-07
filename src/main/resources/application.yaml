@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: app-rag
+
+
+server:
+  port: 8081
