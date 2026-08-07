@@ -1,4 +1,4 @@
-package app.rag.infrastructure.configuration;
+package app.rag.infrastructure.config;
 
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
