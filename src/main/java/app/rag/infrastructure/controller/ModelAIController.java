@@ -9,10 +9,10 @@ import app.rag.infrastructure.dto.request.AskQuestionRequest;
 import app.rag.infrastructure.dto.request.VectorizeRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/v1/model")
@@ -25,9 +25,9 @@ public class ModelAIController {
 
     @PostMapping("/vectorize")
     public ResponseEntity<IngestResult> vectorize(
-            @RequestBody VectorizeRequest request
-            ) {
-        IngestResult result = ingestDocumentUseCase.ingest(request.text());
+            @RequestParam("file") MultipartFile file
+            ) throws IOException {
+        IngestResult result = ingestDocumentUseCase.ingest(file.getBytes());
         return ResponseEntity.ok(result);
     }
 

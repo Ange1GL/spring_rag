@@ -69,6 +69,12 @@
 			<artifactId>spring-ai-vector-store-advisor</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-ai-documentintelligence</artifactId>
+			<version>1.0.7</version>
+		</dependency>
+
 		<!-- RAG avanzado/modular -->
 		<dependency>
 			<groupId>org.springframework.ai</groupId>

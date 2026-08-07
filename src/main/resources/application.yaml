@@ -123,6 +123,11 @@ app:
       # ^ Similitud mínima (coseno) para devolver un fragmento. 0.0 = sin filtro;
       #   un valor típico para filtrar ruido es 0.25-0.5.
 
+azure:
+  document-intelligence:
+    endpoint: ${AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT}
+    key: ${AZURE_DOCUMENT_INTELLIGENCE_KEY}
+
 management:
   # ^ Observabilidad (AGENTS §20): health checks, métricas y Actuator.
   endpoints:
