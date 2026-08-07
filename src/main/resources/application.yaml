@@ -67,6 +67,7 @@ spring:
       api-key: ${AZURE_OPENAI_API_KEY}
       # ^ Clave de acceso al recurso Azure. Sensible -> proviene del .env. Nunca en el repositorio.
 
+
       chat:
         model: ${AZURE_OPENAI_CHAT_DEPLOYMENT}
         # ^ Nombre del deployment de completions en Azure (ej: gpt-4o, gpt-5-mini).
