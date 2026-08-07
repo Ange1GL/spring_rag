@@ -4,6 +4,7 @@ import java.util.List;
 
 public record AskQuestionResult(
         String answer,
-        List<RetrievedChunk> sources
+        List<RetrievedChunk> sources,
+        TokenUsage usage
 ) {
 }

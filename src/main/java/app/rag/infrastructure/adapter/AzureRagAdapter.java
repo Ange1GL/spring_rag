@@ -3,10 +3,18 @@ package app.rag.infrastructure.adapter;
 import app.rag.domain.model.AskQuestionCommand;
 import app.rag.domain.model.AskQuestionResult;
 import app.rag.domain.model.RetrievedChunk;
+import app.rag.domain.model.TokenUsage;
 import app.rag.domain.port.out.RagAnswerPort;
 import app.rag.infrastructure.config.RetrievalProperties;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ChatClientResponse;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.metadata.EmptyUsage;
+import org.springframework.ai.chat.metadata.Usage;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
@@ -14,7 +22,9 @@ import org.springframework.ai.rag.generation.augmentation.ContextualQueryAugment
 import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class AzureRagAdapter implements RagAnswerPort {
@@ -22,14 +32,23 @@ public class AzureRagAdapter implements RagAnswerPort {
     private final ChatClient chatClient;
     private final VectorStore vectorStore;
     private final RetrievalProperties retrievalProperties;
+    private final Counter promptTokenCounter;
+    private final Counter completionTokenCounter;
 
     public AzureRagAdapter(
             ChatClient.Builder chatClientBuilder,
             VectorStore vectorStore,
-            RetrievalProperties retrievalProperties) {
+            RetrievalProperties retrievalProperties,
+            MeterRegistry meterRegistry) {
         this.chatClient = chatClientBuilder.build();
         this.vectorStore = vectorStore;
         this.retrievalProperties = retrievalProperties;
+        this.promptTokenCounter = Counter.builder("rag.tokens.prompt")
+                .description("Tokens de entrada consumidos por el modelo en preguntas RAG")
+                .register(meterRegistry);
+        this.completionTokenCounter = Counter.builder("rag.tokens.completion")
+                .description("Tokens de salida generados por el modelo en preguntas RAG")
+                .register(meterRegistry);
     }
 
     @Override
@@ -53,8 +72,39 @@ public class AzureRagAdapter implements RagAnswerPort {
                 .call()
                 .chatClientResponse();
 
-        String answer = response.chatResponse().getResult().getOutput().getText();
-        return new AskQuestionResult(answer, extractSources(response));
+        ChatResponse chatResponse = Objects.requireNonNull(response.chatResponse(),
+                "chat response is missing from ChatClientResponse");
+        String answer = extractAnswer(chatResponse);
+        TokenUsage usage = extractUsage(chatResponse);
+        recordUsage(usage);
+        return new AskQuestionResult(answer, extractSources(response), usage);
+    }
+
+    private String extractAnswer(ChatResponse chatResponse) {
+        Generation generation = Objects.requireNonNull(chatResponse.getResult(),
+                "generation is missing from chat response");
+        AssistantMessage output = Objects.requireNonNull(generation.getOutput(),
+                "assistant message is missing from generation");
+        return Objects.requireNonNull(output.getText(),
+                "model returned no text content");
+    }
+
+    private TokenUsage extractUsage(ChatResponse chatResponse) {
+        Usage usage = chatResponse.getMetadata().getUsage();
+        if (usage instanceof EmptyUsage) {
+            return null;
+        }
+        int promptTokens = usage.getPromptTokens();
+        int completionTokens = usage.getCompletionTokens();
+        return new TokenUsage(promptTokens, completionTokens, promptTokens + completionTokens);
+    }
+
+    private void recordUsage(TokenUsage usage) {
+        if (usage == null) {
+            return;
+        }
+        promptTokenCounter.increment(usage.promptTokens());
+        completionTokenCounter.increment(usage.completionTokens());
     }
 
 
