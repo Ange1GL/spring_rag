@@ -1,7 +1,88 @@
 spring:
   application:
     name: app-rag
+    # ^ Nombre de la aplicación; se usa en logs, actuator y configuración de observabilidad
 
+  datasource:
+    url: ${DB_URL}
+    # ^ URL de conexión a PostgreSQL (con pgvector). Sensible/entorno -> proviene del .env.
+    driver-class-name: org.postgresql.Driver
+    # ^ Driver JDBC de PostgreSQL.
+    username: ${DB_USERNAME}
+    # ^ Usuario de la base de datos. Sensible -> proviene del .env.
+    password: ${DB_PASSWORD}
+    # ^ Contraseña de la base de datos. Sensible -> proviene del .env. Nunca en el repositorio.
+    hikari:
+      # ^ Configuración del pool de conexiones HikariCP (spring.datasource.hikari.*).
+      maximum-pool-size: 10
+      # ^ Tamaño máximo del pool de conexiones.
+      minimum-idle: 1
+      # ^ Mínimo de conexiones inactivas que mantiene el pool.
+      idle-timeout: 30000
+      # ^ Tiempo (ms) que una conexión inactiva puede permanecer antes de cerrarse.
+      pool-name: HikariCP
+      # ^ Nombre del pool (visible en logs/métricas).
+      max-lifetime: 200000
+      # ^ Vida máxima (ms) de una conexión antes de ser reciclada.
+      connection-timeout: 30000
+      # ^ Tiempo máximo (ms) de espera para obtener una conexión del pool.
+
+  jpa:
+    # ^ Configuración de Spring Data JPA/Hibernate.
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        # ^ Dialecto de PostgreSQL para Hibernate.
+        format_sql: false
+        # ^ Formato de los SQL en logs (false = compacto).
+    hibernate:
+      ddl-auto: validate
+      # ^ No altera el esquema: solo valida que coincida con las entidades (producción).
+    show-sql: false
+    # ^ Muestra o no los SQL generados en los logs.
+
+  config:
+    import: optional:file:.env[.properties]
+    # ^ Carga variables sensibles desde el archivo .env sin agregar librerías (solución nativa de Spring Boot).
+    #   Si no existe el .env, la app arranca igual (optional).
+
+  ai:
+    model:
+      chat: openai
+      # ^ Habilita el ChatModel (completions). Es el valor por defecto; se deja explícito para documentar el proveedor activo.
+      embedding: openai
+      # ^ Habilita el EmbeddingModel. Idem: es el default, se documenta por claridad.
+
+    retry:
+      max-attempts: 3
+      # ^ Máximo de reintentos ante fallos transitorios (el default es 10; se baja para cumplir AGENTS §19: retries limitados).
+      backoff:
+        initial-interval: 1s
+        # ^ Espera inicial del backoff exponencial entre reintentos.
+
+    openai:
+      base-url: ${AZURE_OPENAI_BASE_URL}
+      # ^ Endpoint de Azure OpenAI / AI Foundry compatible con la API de OpenAI (ej: https://<recurso>.openai.azure.com/openai/v1).
+      #   Valor sensible/entorno -> proviene del .env.
+      api-key: ${AZURE_OPENAI_API_KEY}
+      # ^ Clave de acceso al recurso Azure. Sensible -> proviene del .env. Nunca en el repositorio.
+
+      chat:
+        model: ${AZURE_OPENAI_CHAT_DEPLOYMENT}
+        # ^ Nombre del deployment de completions en Azure (ej: gpt-4o, gpt-5-mini).
+        temperature: 0.2
+        # ^ Controla la aleatoriedad (0.2 = respuestas más deterministas, recomendado para RAG).
+        #   OJO: no usar temperature con modelos razonadores (gpt-5, o1); para esos usar solo max-completion-tokens.
+        max-tokens: 1024
+        # ^ Límite de tokens de la respuesta. Solo para modelos NO razonadores (gpt-4o y similares).
+
+      embedding:
+        model: ${AZURE_OPENAI_EMBEDDING_DEPLOYMENT}
+        # ^ Nombre del deployment de embeddings en Azure (ej: text-embedding-3-small).
+        dimensions: 1536
+        # ^ Dimensiones del vector de salida. Debe coincidir con la columna vector en pgvector.
+        #   Opcional: para text-embedding-3-small el default ya es 1536; solo es necesario si quieres reducirlo.
 
 server:
   port: 8081
+  # ^ Puerto del servidor HTTP.
