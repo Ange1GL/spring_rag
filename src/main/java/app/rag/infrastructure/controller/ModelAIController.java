@@ -2,11 +2,11 @@ package app.rag.infrastructure.controller;
 
 import app.rag.domain.model.AskQuestionCommand;
 import app.rag.domain.model.AskQuestionResult;
+import app.rag.domain.model.DocumentFile;
 import app.rag.domain.model.IngestResult;
 import app.rag.domain.port.in.AskQuestionUseCase;
 import app.rag.domain.port.in.IngestDocumentUseCase;
 import app.rag.infrastructure.dto.request.AskQuestionRequest;
-import app.rag.infrastructure.dto.request.VectorizeRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +27,8 @@ public class ModelAIController {
     public ResponseEntity<IngestResult> vectorize(
             @RequestParam("file") MultipartFile file
             ) throws IOException {
-        IngestResult result = ingestDocumentUseCase.ingest(file.getBytes());
+        DocumentFile documentFile = DocumentFile.of(file.getBytes(), file.getOriginalFilename(), file.getContentType());
+        IngestResult result = ingestDocumentUseCase.ingest(documentFile);
         return ResponseEntity.ok(result);
     }
 
