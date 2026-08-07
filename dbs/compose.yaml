@@ -1,0 +1,21 @@
+services:
+  spring_ai_pgvector:
+    image: pgvector/pgvector:pg16
+    container_name: spring_ai_pgvector
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: Passw0rd
+      POSTGRES_DB: spring_ai_pgvector
+    ports:
+      - "5441:5432"
+    volumes:
+      - spring_ai_pgvector:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d mydatabase"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  spring_ai_pgvector:
