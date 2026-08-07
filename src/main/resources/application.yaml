@@ -99,6 +99,20 @@ spring:
         table-name: vector_store
         # ^ Nombre de la tabla esperada por PgVectorStore (default de Spring AI).
 
+app:
+  rag:
+    chunking:
+      # ^ Configuración del particionado de documentos (TokenTextSplitter de Spring AI).
+      #   No la auto-configura Spring AI: se inyecta vía @ConfigurationProperties.
+      chunk-size: 800
+      # ^ Máximo de tokens por fragmento (default de Spring AI). Balance entre contexto y precisión.
+      min-chunk-size-chars: 350
+      # ^ Mínimo de caracteres para considerar válido un fragmento.
+      min-chunk-length-to-embed: 20
+      # ^ Mínimo de tokens para generar el embedding; fragmentos más cortos se descartan.
+      max-num-chunks: 10000
+      # ^ Tope de fragmentos por documento (protección ante documentos gigantes).
+
 server:
   port: 8081
   # ^ Puerto del servidor HTTP.

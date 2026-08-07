@@ -958,3 +958,10 @@ La aplicación conoce sus necesidades mediante **puertos**.
 La infraestructura conoce las tecnologías concretas mediante **adaptadores**.
 
 Ese principio debe mantenerse durante toda la evolución del proyecto.
+
+
+
+## Configuración de Beans
+
+- en Paquete de src/main/java/app/rag/infrastructure/config de este proyecto va la configuraciones de los Beans para
+integrar las librerias externas o configuraciones
