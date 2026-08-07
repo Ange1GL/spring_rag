@@ -1,9 +1,13 @@
 package app.rag.infrastructure.controller;
 
+import app.rag.domain.model.AskQuestionCommand;
+import app.rag.domain.model.AskQuestionResult;
 import app.rag.domain.model.IngestResult;
+import app.rag.domain.port.in.AskQuestionUseCase;
 import app.rag.domain.port.in.IngestDocumentUseCase;
 import app.rag.domain.port.out.ModelAIProvider;
 import app.rag.infrastructure.dto.request.AskModelAIRequest;
+import app.rag.infrastructure.dto.request.AskQuestionRequest;
 import app.rag.infrastructure.dto.request.VectorizeRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +23,7 @@ public class ModelAIController {
 
     private final ModelAIProvider modelAIProvider;
     private final IngestDocumentUseCase ingestDocumentUseCase;
+    private final AskQuestionUseCase askQuestionUseCase;
 
     @PostMapping
     public ResponseEntity<String> ask(
@@ -34,5 +39,16 @@ public class ModelAIController {
             ) {
         IngestResult result = ingestDocumentUseCase.ingest(request.text());
         return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/question")
+    public ResponseEntity<AskQuestionResult> question(
+            @RequestBody AskQuestionRequest request
+            ) {
+        AskQuestionCommand command = new AskQuestionCommand(
+                request.question(),
+                request.additionalContext(),
+                request.topK() != null ? request.topK() : 0);
+        return ResponseEntity.ok(askQuestionUseCase.ask(command));
     }
 }

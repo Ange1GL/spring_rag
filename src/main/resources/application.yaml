@@ -113,6 +113,31 @@ app:
       max-num-chunks: 10000
       # ^ Tope de fragmentos por documento (protección ante documentos gigantes).
 
+    retrieval:
+      # ^ Configuración de recuperación RAG (AGENTS §14: top-k y umbral configurables).
+      #   Se inyecta vía @ConfigurationProperties (RetrievalProperties).
+      default-top-k: 5
+      # ^ Fragmentos a recuperar cuando la petición no indica topK.
+      similarity-threshold: 0.0
+      # ^ Similitud mínima (coseno) para devolver un fragmento. 0.0 = sin filtro;
+      #   un valor típico para filtrar ruido es 0.25-0.5.
+
+management:
+  # ^ Observabilidad (AGENTS §20): health checks, métricas y Actuator.
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+        # ^ Endpoints Actuator expuestos vía web.
+  endpoint:
+    health:
+      show-details: never
+      # ^ No expone detalles de salud a clientes no autorizados.
+  info:
+    env:
+      enabled: true
+      # ^ Habilita información de entorno en /actuator/info.
+
 server:
   port: 8081
   # ^ Puerto del servidor HTTP.
